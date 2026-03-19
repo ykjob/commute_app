@@ -1,8 +1,8 @@
 body {
   margin: 0;
-  font-family: sans-serif;
-  background: #f3f4f6;
-  color: #111827;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: #0f172a;
+  color: white;
 }
 
 * {
@@ -10,166 +10,129 @@ body {
 }
 
 .app {
-  padding: 24px;
-}
-
-.container {
-  max-width: 920px;
-  margin: 0 auto;
-}
-
-h1,
-h2,
-h3 {
-  margin-top: 0;
-}
-
-.lead {
-  color: #4b5563;
-  margin-bottom: 20px;
-}
-
-.panel {
-  background: #ffffff;
-  border-radius: 16px;
-  padding: 20px;
-  margin-top: 20px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-}
-
-.form-grid {
-  display: grid;
-  gap: 16px;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-}
-
-label {
-  display: block;
-  font-weight: 600;
-}
-
-select {
-  display: block;
   width: 100%;
-  margin-top: 8px;
-  padding: 10px 12px;
-  font-size: 16px;
-}
-
-.now-box {
-  margin-top: 16px;
-  padding: 12px 14px;
-  background: #f9fafb;
-  border-radius: 12px;
-}
-
-.sub {
-  margin-left: 8px;
-  color: #6b7280;
-  font-size: 14px;
-}
-
-.main-card {
-  background: #111827;
-  color: #ffffff;
-  border-radius: 16px;
-  padding: 20px;
-  margin-bottom: 20px;
-}
-
-.route-line {
-  font-size: 15px;
-  color: #d1d5db;
-}
-
-.train-meta {
-  display: flex;
-  gap: 12px;
-  flex-wrap: wrap;
-  margin-top: 12px;
-  font-size: 15px;
-}
-
-.big-time {
-  font-size: 34px;
-  font-weight: bold;
-  margin-top: 20px;
-}
-
-.big-remaining {
-  font-size: 26px;
-  font-weight: bold;
-  margin-top: 12px;
-}
-
-.candidate-list {
+  max-width: 720px;
+  margin: 0 auto;
+  min-height: 100vh;
+  padding: 16px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 16px;
 }
 
-.candidate-button {
-  width: 100%;
-  text-align: left;
-  padding: 14px;
-  border-radius: 12px;
-  border: 1px solid #d1d5db;
-  background: #ffffff;
-  cursor: pointer;
-}
-
-.candidate-button.selected {
-  background: #eef2ff;
-  border-color: #4f46e5;
-}
-
-.candidate-top {
+/* 上部 */
+.header {
   display: flex;
+  flex-direction: column;
   gap: 10px;
-  flex-wrap: wrap;
-  font-weight: 600;
 }
 
-.candidate-bottom {
-  margin-top: 6px;
-  color: #4b5563;
-  font-size: 14px;
-}
-
-.message {
-  padding: 14px;
+.select {
+  width: 100%;
+  padding: 14px 12px;
+  font-size: 16px;
   border-radius: 12px;
-  background: #f9fafb;
-  color: #374151;
+  border: none;
 }
 
-.message.small {
+/* 本命カード */
+.main-card {
+  background: #1e293b;
+  border-radius: 20px;
+  padding: 24px 16px;
+  text-align: center;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+}
+
+.time {
+  font-size: clamp(36px, 8vw, 56px);
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+.train {
+  margin-top: 8px;
+  font-size: clamp(18px, 4vw, 24px);
+  opacity: 0.85;
+}
+
+.remain {
+  margin-top: 10px;
+  font-size: clamp(16px, 3.8vw, 20px);
+  color: #38bdf8;
+}
+
+/* 候補リスト */
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #1e293b;
+  padding: 16px;
+  border-radius: 14px;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: 0.2s;
+}
+
+.item.active {
+  border-color: #38bdf8;
+}
+
+.footer {
+  text-align: center;
   font-size: 14px;
+  opacity: 0.7;
+  padding-bottom: 8px;
 }
 
-.error-message {
-  color: #b91c1c;
-}
-
-button,
-select {
-  font: inherit;
-}
-
-@media (max-width: 480px) {
+/* タブレット以上 */
+@media (min-width: 600px) {
   .app {
-    padding: 16px;
+    padding: 24px;
+    gap: 20px;
   }
 
-  .panel {
-    padding: 16px;
+  .header {
+    flex-direction: row;
   }
 
-  .big-time {
-    font-size: 28px;
+  .main-card {
+    padding: 32px 24px;
   }
 
-  .big-remaining {
-    font-size: 22px;
+  .list {
+    gap: 12px;
+  }
+}
+
+/* PC向け */
+@media (min-width: 900px) {
+  .app {
+    max-width: 900px;
+    padding: 32px 24px;
+  }
+
+  .main-card {
+    padding: 40px 32px;
+  }
+
+  .list {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+  }
+
+  .item {
+    flex-direction: column;
+    gap: 6px;
+    text-align: center;
+    min-height: 88px;
   }
 }
