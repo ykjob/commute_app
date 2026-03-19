@@ -1,39 +1,89 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import "./App.css";
+import { loadStations } from "./data/stations";
+import { loadTrains } from "./data/trains";
+import { loadStopTimes } from "./data/stopTimes";
+import {
+  buildCandidates,
+  getRecommendedIndex,
+  getNowMinutes,
+  formatNowTime,
+} from "./data/candidateUtils";
 
 export default function App() {
-  const [selectedIndex, setSelectedIndex] = useState(1);
+  const [stations, setStations] = useState([]);
+  const [candidates, setCandidates] = useState([]);
+  const [selectedIndex, setSelectedIndex] = useState(0);
+  const [currentTime, setCurrentTime] = useState(formatNowTime());
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  // 仮データ
-  // 後で stop_times / trains / stations から作る想定
-  const candidates = [
-    {
-      depTime: "08:28",
-      arrTime: "08:52",
-      remain: "あと24分",
-      destination: "門司港行",
-      type: "普通",
-      direction: "下り",
-    },
-    {
-      depTime: "08:31",
-      arrTime: "08:55",
-      remain: "あと27分",
-      destination: "門司港行",
-      type: "普通",
-      direction: "下り",
-    },
-    {
-      depTime: "08:36",
-      arrTime: "09:00",
-      remain: "あと32分",
-      destination: "鳥栖行",
-      type: "普通",
-      direction: "上り",
-    },
-  ];
+  const fromStationId = "shingu_chuo";
+  const toStationId = "hakata";
 
+  useEffect(() => {
+    async function init() {
+      try {
+        setLoading(true);
+        setError("");
+
+        const [stationData, trainData, stopTimeData] = await Promise.all([
+          loadStations(),
+          loadTrains(),
+          loadStopTimes(),
+        ]);
+
+        setStations(stationData);
+
+        const now = new Date();
+        const nowMinutes = getNowMinutes(now);
+
+        const builtCandidates = buildCandidates({
+          fromStationId,
+          toStationId,
+          stopTimes: stopTimeData,
+          trains: trainData,
+          nowMinutes,
+        });
+
+        setCandidates(builtCandidates);
+
+        const recommendedIndex = getRecommendedIndex(builtCandidates, nowMinutes, 3);
+        setSelectedIndex(recommendedIndex);
+
+        setCurrentTime(formatNowTime(now));
+      } catch (err) {
+        console.error(err);
+        setError("CSVの読み込みまたは候補生成に失敗しました。");
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    init();
+  }, []);
+
+  const fromStation = stations.find((s) => s.station_id === fromStationId);
+  const toStation = stations.find((s) => s.station_id === toStationId);
   const main = candidates[selectedIndex];
+
+  if (loading) {
+    return <div className="app"><div className="container">読み込み中...</div></div>;
+  }
+
+  if (error) {
+    return <div className="app"><div className="container">{error}</div></div>;
+  }
+
+  if (!candidates.length) {
+    return (
+      <div className="app">
+        <div className="container">
+          条件に合う候補列車が見つかりませんでした。
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="app">
@@ -45,27 +95,19 @@ export default function App() {
 
         <section className="controls">
           <div className="field-group">
-            <label className="label" htmlFor="fromStation">
-              出発駅
-            </label>
-            <select id="fromStation" className="select">
-              <option>福工大前</option>
-            </select>
+            <label className="label">出発駅</label>
+            <div className="select">{fromStation?.station_name ?? fromStationId}</div>
           </div>
 
           <div className="field-group">
-            <label className="label" htmlFor="toStation">
-              到着駅
-            </label>
-            <select id="toStation" className="select">
-              <option>博多</option>
-            </select>
+            <label className="label">到着駅</label>
+            <div className="select">{toStation?.station_name ?? toStationId}</div>
           </div>
         </section>
 
         <section className="status-bar">
           <span className="status-label">現在時刻</span>
-          <span className="status-time">08:34</span>
+          <span className="status-time">{currentTime}</span>
         </section>
 
         <section className="main-section">
@@ -111,10 +153,8 @@ export default function App() {
           <div className="candidate-list">
             {candidates.map((train, index) => (
               <button
-                key={`${train.depTime}-${train.destination}-${index}`}
-                className={`candidate-card ${
-                  index === selectedIndex ? "active" : ""
-                }`}
+                key={`${train.trainId}-${index}`}
+                className={`candidate-card ${index === selectedIndex ? "active" : ""}`}
                 onClick={() => setSelectedIndex(index)}
               >
                 <div className="candidate-time">{train.depTime} 発</div>
@@ -123,6 +163,7 @@ export default function App() {
                   <span>{train.type}</span>
                   <span>{train.direction}</span>
                 </div>
+                <div className="candidate-arrival">到着 {train.arrTime}</div>
               </button>
             ))}
           </div>

@@ -1,14 +1,10 @@
 export async function fetchCSV(path) {
-  const normalizedPath = path.startsWith("/")
-    ? path.slice(1)
-    : path;
+  const cleanPath = path.startsWith("/") ? path.slice(1) : path;
+  const url = `${import.meta.env.BASE_URL}${cleanPath}`;
 
-  const fullPath = `${import.meta.env.BASE_URL}${normalizedPath}`;
-
-  const res = await fetch(fullPath);
-
+  const res = await fetch(url);
   if (!res.ok) {
-    throw new Error(`CSVの読み込みに失敗しました: ${fullPath}`);
+    throw new Error(`CSV読み込み失敗: ${url}`);
   }
 
   const text = await res.text();
@@ -16,5 +12,5 @@ export async function fetchCSV(path) {
   return text
     .trim()
     .split("\n")
-    .map((line) => line.replace(/\r/g, "").split(","));
+    .map((line) => line.split(",").map((cell) => cell.trim()));
 }
