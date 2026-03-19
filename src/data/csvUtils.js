@@ -11,5 +11,10 @@ export async function fetchCSV(path) {
     throw new Error(`CSVの読み込みに失敗しました: ${fullPath}`);
   }
 
-  return await res.text();
+  const text = await res.text();
+
+  return text
+    .trim()
+    .split("\n")
+    .map((line) => line.replace(/\r/g, "").split(","));
 }
