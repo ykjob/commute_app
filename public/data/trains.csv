@@ -9,3 +9,9 @@ train_id,line_id,train_type,destination,direction
 2354M,kagoshima,普通,福間,上り
 2166M,kagoshima,普通,海老津,上り
 2168M,kagoshima,普通,福間,上り
+2350M,kagoshima,普通,福間,上り
+
+4140M,kagoshima,区間快速,門司港,上り
+2158M,kagoshima,普通,折尾,上り
+4142M,kagoshima,区間快速,門司港,上り
+2160M,kagoshima,普通,福間,上り

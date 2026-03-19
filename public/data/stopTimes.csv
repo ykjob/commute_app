@@ -19,3 +19,14 @@ train_id,station_id,dep_time,arr_time,stop_order
 2166M,shingu_chuo,,17:58,1
 2168M,hakata,17:43,,0
 2168M,shingu_chuo,,18:12,1
+
+2350M,hakata,15:02,,0
+2350M,shingu_chuo,,15:22,1
+4140M,hakata,15:10,,0
+4140M,shingu_chuo,,18:12,1
+2168M,hakata,17:43,,0
+2168M,shingu_chuo,,18:12,1
+2168M,hakata,17:43,,0
+2168M,shingu_chuo,,18:12,1
+2168M,hakata,17:43,,0
+2168M,shingu_chuo,,18:12,1
