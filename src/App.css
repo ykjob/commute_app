@@ -40,9 +40,8 @@ input {
 
 .app {
   min-height: 100vh;
-  padding: 10px 12px 24px;
-  background:
-    linear-gradient(180deg, #edf4ff 0%, #f3f6fb 120px, #f3f6fb 100%);
+  padding: 8px 12px 24px; /* ← 上を詰める */
+  background: var(--bg);
 }
 
 .container {

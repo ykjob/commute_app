@@ -114,10 +114,7 @@ export default function App() {
   return (
     <div className="app">
       <div className="container">
-        <header className="header">
-          <h1 className="title">乗り過ごし防止アプリ</h1>
-          <p className="subtitle">乗車後に今の電車を特定して到着時刻を確認</p>
-        </header>
+  //タイトルは削除
 
         <section className="controls">
           <div className="field-group">
