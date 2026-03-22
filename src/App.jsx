@@ -114,6 +114,10 @@ export default function App() {
   return (
     <div className="app">
       <div className="container">
+        <section className="status-bar top">
+          <span className="status-label">現在時刻</span>
+          <span className="status-time">{currentTime}</span>
+        </section>
 
         <section className="controls">
           <div className="field-group">
@@ -169,7 +173,7 @@ export default function App() {
         ) : (
           <>
             <section className="main-section">
-              <div className="section-title">本命候補</div>
+              
 
               <div className="main-card">
                 <div className="main-top">
