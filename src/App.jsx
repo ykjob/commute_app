@@ -114,7 +114,6 @@ export default function App() {
   return (
     <div className="app">
       <div className="container">
-  //タイトルは削除
 
         <section className="controls">
           <div className="field-group">
