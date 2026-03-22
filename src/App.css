@@ -40,9 +40,9 @@ input {
 
 .app {
   min-height: 100vh;
-  padding: 16px 12px 28px;
+  padding: 10px 12px 24px;
   background:
-    linear-gradient(180deg, #edf4ff 0%, #f3f6fb 180px, #f3f6fb 100%);
+    linear-gradient(180deg, #edf4ff 0%, #f3f6fb 120px, #f3f6fb 100%);
 }
 
 .container {
@@ -52,8 +52,8 @@ input {
 }
 
 .header {
-  margin-bottom: 16px;
-  padding: 6px 4px 0;
+  margin-bottom: 10px;
+  padding: 0 4px 0;
 }
 
 .title {
@@ -73,8 +73,8 @@ input {
 
 .controls {
   display: grid;
-  grid-template-columns: 1fr;
-  gap: 12px;
+  grid-template-columns: 1fr 1fr; /* ← 横並び */
+  gap: 10px;
   margin-bottom: 14px;
 }
 
@@ -82,7 +82,7 @@ input {
   background: var(--card);
   border: 1px solid var(--line);
   border-radius: var(--radius-md);
-  padding: 12px 14px;
+  padding: 10px 12px; /* 少し圧縮 */
   box-shadow: var(--shadow);
 }
 
