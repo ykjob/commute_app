@@ -12,5 +12,5 @@ export async function fetchCSV(path) {
   return text
     .trim()
     .split("\n")
-    .map((line) => line.split(",").map((cell) => cell.trim()));
+    .map((line) => line.replace(/\r/g, "").split(",").map((cell) => cell.trim()));
 }
