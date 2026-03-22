@@ -40,7 +40,7 @@ input {
 
 .app {
   min-height: 100vh;
-  padding: 8px 12px 24px; /* ← 上を詰める */
+  padding: 6px 12px 24px; /* ← 上を詰める */
   background: var(--bg);
 }
 
@@ -162,13 +162,16 @@ input {
   letter-spacing: 0.02em;
 }
 
-.main-section,
+.main-section {
+  margin-top: 6px;   /* ← 追加 */
+  margin-bottom: 14px;
+}
 .candidate-section {
-  margin-bottom: 18px;
+  margin-bottom: 14px;
 }
 
 .section-title {
-  margin: 0 0 10px;
+  margin: 0 0 6px;
   padding-left: 2px;
   font-size: 0.96rem;
   font-weight: 800;
