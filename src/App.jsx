@@ -157,10 +157,7 @@ export default function App() {
           </div>
         </section>
 
-        <section className="status-bar">
-          <span className="status-label">現在時刻</span>
-          <span className="status-time">{currentTime}</span>
-        </section>
+        
 
         {fromStationId === toStationId ? (
           <div className="empty-message">
