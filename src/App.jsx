@@ -175,17 +175,27 @@ export default function App() {
               <div className="main-card">
                 <div className="main-top">
                   <div className="arrival-block">
-                    <div className="arrival-label">到着予定</div>
+                    <div className="arrival-label">目的地到着予定</div>
                     <div className="arrival-time">{main.arrTime}</div>
                   </div>
 
                   <div className="remain-block">
-                    <div className="remain-label">残り時間</div>
+                    <div className="remain-label">　</div>
                     <div className="remain-time">{main.remain}</div>
                   </div>
                 </div>
 
                 <div className="detail-grid">
+                  
+                  <div className="detail-item">
+                  
+                    <span className="detail-key">発車時刻</span>
+                    <span className="detail-value">{main.depTime}</span>
+                  </div>
+                  <div className="detail-item">
+                    <span className="detail-key">行先</span>
+                    <span className="detail-value">{main.destination}</span>
+                  </div>
                   <div className="detail-item">
                     <span className="detail-key">出発駅</span>
                     <span className="detail-value">
@@ -197,14 +207,6 @@ export default function App() {
                     <span className="detail-value">
                       {toStation?.station_name ?? toStationId}
                     </span>
-                  </div>
-                  <div className="detail-item">
-                    <span className="detail-key">発車時刻</span>
-                    <span className="detail-value">{main.depTime}</span>
-                  </div>
-                  <div className="detail-item">
-                    <span className="detail-key">行き先</span>
-                    <span className="detail-value">{main.destination}</span>
                   </div>
                   <div className="detail-item">
                     <span className="detail-key">種別</span>

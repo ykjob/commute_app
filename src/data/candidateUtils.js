@@ -42,6 +42,9 @@ export function buildCandidates({
     if (!fromStop || !toStop) continue;
     if (!fromStop.dep_time || !toStop.arr_time) continue;
 
+    // 逆方向を除外
+    if (fromStop.stop_order >= toStop.stop_order) continue;
+
     const depMinutes = timeToMinutes(fromStop.dep_time);
     const arrMinutes = timeToMinutes(toStop.arr_time);
 
@@ -65,7 +68,19 @@ export function buildCandidates({
 
   candidates.sort((a, b) => a.depMinutes - b.depMinutes);
 
-  return candidates;
+  // 現在時刻に一番近い列車の位置
+  const index = candidates.findIndex(
+    (c) => c.depMinutes >= nowMinutes
+  );
+
+  // 前2件 + 後3件
+  const before = 2;
+  const after = 3;
+
+  let start = Math.max(0, index - before);
+  let end = index + after;
+
+  return candidates.slice(start, end);
 }
 
 export function getRecommendedIndex(candidates, nowMinutes, offsetMinutes = 3) {
