@@ -23,10 +23,10 @@ export default function App() {
   const [trains, setTrains] = useState([]);
   const [stopTimes, setStopTimes] = useState([]);
 
-  const [fromStationId, setFromStationId] = useState("hakata");
-  const [toStationId, setToStationId] = useState("shingu_chuo");
-
+  const [fromStationId, setFromStationId] = useState("shingu_chuo");
+  const [toStationId, setToStationId] = useState("hakata");
   const [routeKey, setRouteKey] = useState("");
+
   const [candidates, setCandidates] = useState([]);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [currentTime, setCurrentTime] = useState(formatNowTime());
@@ -37,7 +37,6 @@ export default function App() {
     return presetRoutes[routeKey] || null;
   }, [routeKey]);
 
-  // 初回ロード
   useEffect(() => {
     async function init() {
       try {
@@ -55,7 +54,6 @@ export default function App() {
         setStopTimes(stopTimeData);
         setCurrentTime(formatNowTime(new Date()));
 
-        // URLの route を最優先
         const urlRouteKey = getRouteKeyFromUrl();
         const urlPreset = presetRoutes[urlRouteKey];
 
@@ -67,7 +65,6 @@ export default function App() {
           return;
         }
 
-        // URLにない場合だけ前回保存を使う
         const savedRouteKey = localStorage.getItem(LAST_ROUTE_KEY);
         const savedPreset = presetRoutes[savedRouteKey];
 
@@ -87,19 +84,6 @@ export default function App() {
     init();
   }, []);
 
-  // routeKey変更時に駅へ反映
-  useEffect(() => {
-    if (!routeKey) return;
-
-    const preset = presetRoutes[routeKey];
-    if (!preset) return;
-
-    setFromStationId(preset.from);
-    setToStationId(preset.to);
-    localStorage.setItem(LAST_ROUTE_KEY, routeKey);
-  }, [routeKey]);
-
-  // 現在時刻を1分ごとに更新
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentTime(formatNowTime(new Date()));
@@ -108,7 +92,6 @@ export default function App() {
     return () => clearInterval(timer);
   }, []);
 
-  // 駅選択やデータロード後に候補再計算
   useEffect(() => {
     if (!stations.length || !trains.length || !stopTimes.length) return;
     if (!fromStationId || !toStationId) return;
@@ -120,8 +103,6 @@ export default function App() {
     }
 
     try {
-      setError("");
-
       const now = new Date();
       const nowMinutes = getNowMinutes(now);
 

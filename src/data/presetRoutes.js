@@ -1,21 +1,21 @@
 export const presetRoutes = {
   morning: {
-    label: "自分 朝",
+    label: "morning",
     from: "shingu_chuo",
     to: "hakata",
   },
   evening: {
-    label: "自分 帰り",
+    label: "homecoming",
     from: "hakata",
     to: "shingu_chuo",
   },
   wife_morning: {
-    label: "奥さん 朝",
+    label: "wife morning",
     from: "shingu_chuo",
     to: "kashii",
   },
   wife_evening: {
-    label: "奥さん 帰り",
+    label: "wife homecoming",
     from: "kashii",
     to: "shingu_chuo",
   },
