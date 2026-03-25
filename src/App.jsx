@@ -1,8 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import "./App.css";
 import { loadStations } from "./data/stations";
 import { loadTrains } from "./data/trains";
 import { loadStopTimes } from "./data/stopTimes";
+import { presetRoutes } from "./data/presetRoutes";
 import {
   buildCandidates,
   getRecommendedIndex,
@@ -10,19 +11,31 @@ import {
   formatNowTime,
 } from "./data/candidateUtils";
 
+const LAST_ROUTE_KEY = "commute_app_last_route";
+
+function getRouteKeyFromUrl() {
+  const params = new URLSearchParams(window.location.search);
+  return params.get("route");
+}
+
 export default function App() {
   const [stations, setStations] = useState([]);
   const [trains, setTrains] = useState([]);
   const [stopTimes, setStopTimes] = useState([]);
 
-  const [fromStationId, setFromStationId] = useState("shingu_chuo");
-  const [toStationId, setToStationId] = useState("hakata");
+  const [fromStationId, setFromStationId] = useState("hakata");
+  const [toStationId, setToStationId] = useState("shingu_chuo");
 
+  const [routeKey, setRouteKey] = useState("");
   const [candidates, setCandidates] = useState([]);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [currentTime, setCurrentTime] = useState(formatNowTime());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+
+  const activePreset = useMemo(() => {
+    return presetRoutes[routeKey] || null;
+  }, [routeKey]);
 
   // 初回ロード
   useEffect(() => {
@@ -41,6 +54,28 @@ export default function App() {
         setTrains(trainData);
         setStopTimes(stopTimeData);
         setCurrentTime(formatNowTime(new Date()));
+
+        // URLの route を最優先
+        const urlRouteKey = getRouteKeyFromUrl();
+        const urlPreset = presetRoutes[urlRouteKey];
+
+        if (urlPreset) {
+          setRouteKey(urlRouteKey);
+          setFromStationId(urlPreset.from);
+          setToStationId(urlPreset.to);
+          localStorage.setItem(LAST_ROUTE_KEY, urlRouteKey);
+          return;
+        }
+
+        // URLにない場合だけ前回保存を使う
+        const savedRouteKey = localStorage.getItem(LAST_ROUTE_KEY);
+        const savedPreset = presetRoutes[savedRouteKey];
+
+        if (savedPreset) {
+          setRouteKey(savedRouteKey);
+          setFromStationId(savedPreset.from);
+          setToStationId(savedPreset.to);
+        }
       } catch (err) {
         console.error(err);
         setError("CSVの読み込みに失敗しました。");
@@ -50,6 +85,27 @@ export default function App() {
     }
 
     init();
+  }, []);
+
+  // routeKey変更時に駅へ反映
+  useEffect(() => {
+    if (!routeKey) return;
+
+    const preset = presetRoutes[routeKey];
+    if (!preset) return;
+
+    setFromStationId(preset.from);
+    setToStationId(preset.to);
+    localStorage.setItem(LAST_ROUTE_KEY, routeKey);
+  }, [routeKey]);
+
+  // 現在時刻を1分ごとに更新
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(formatNowTime(new Date()));
+    }, 60 * 1000);
+
+    return () => clearInterval(timer);
   }, []);
 
   // 駅選択やデータロード後に候補再計算
@@ -64,6 +120,8 @@ export default function App() {
     }
 
     try {
+      setError("");
+
       const now = new Date();
       const nowMinutes = getNowMinutes(now);
 
@@ -94,6 +152,16 @@ export default function App() {
   const fromStation = stations.find((s) => s.station_id === fromStationId);
   const toStation = stations.find((s) => s.station_id === toStationId);
   const main = candidates[selectedIndex];
+
+  const handleFromChange = (e) => {
+    setFromStationId(e.target.value);
+    setRouteKey("");
+  };
+
+  const handleToChange = (e) => {
+    setToStationId(e.target.value);
+    setRouteKey("");
+  };
 
   if (loading) {
     return (
@@ -128,7 +196,7 @@ export default function App() {
               id="fromStation"
               className="select-input"
               value={fromStationId}
-              onChange={(e) => setFromStationId(e.target.value)}
+              onChange={handleFromChange}
             >
               {stations.map((station) => (
                 <option key={station.station_id} value={station.station_id}>
@@ -146,7 +214,7 @@ export default function App() {
               id="toStation"
               className="select-input"
               value={toStationId}
-              onChange={(e) => setToStationId(e.target.value)}
+              onChange={handleToChange}
             >
               {stations.map((station) => (
                 <option key={station.station_id} value={station.station_id}>
@@ -157,7 +225,11 @@ export default function App() {
           </div>
         </section>
 
-        
+        {activePreset && (
+          <section className="route-badge-section">
+            <div className="route-badge">{activePreset.label}</div>
+          </section>
+        )}
 
         {fromStationId === toStationId ? (
           <div className="empty-message">
@@ -170,8 +242,6 @@ export default function App() {
         ) : (
           <>
             <section className="main-section">
-              
-
               <div className="main-card">
                 <div className="main-top">
                   <div className="arrival-block">
@@ -186,9 +256,7 @@ export default function App() {
                 </div>
 
                 <div className="detail-grid">
-                  
                   <div className="detail-item">
-                  
                     <span className="detail-key">発車時刻</span>
                     <span className="detail-value">{main.depTime}</span>
                   </div>
