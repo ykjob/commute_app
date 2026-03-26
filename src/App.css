@@ -351,3 +351,21 @@ input {
     grid-template-columns: 1fr;
   }
 }
+
+
+.route-badge-section {
+  margin: -2px 0 12px;
+}
+
+.route-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: #e8f0ff;
+  color: #1d4ed8;
+  font-size: 0.85rem;
+  font-weight: 800;
+  border: 1px solid #cfe0ff;
+}

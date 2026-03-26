@@ -1,14 +1,22 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import "./App.css";
 import { loadStations } from "./data/stations";
 import { loadTrains } from "./data/trains";
 import { loadStopTimes } from "./data/stopTimes";
+import { presetRoutes } from "./data/presetRoutes";
 import {
   buildCandidates,
   getRecommendedIndex,
   getNowMinutes,
   formatNowTime,
 } from "./data/candidateUtils";
+
+const LAST_ROUTE_KEY = "commute_app_last_route";
+
+function getRouteKeyFromUrl() {
+  const params = new URLSearchParams(window.location.search);
+  return params.get("route");
+}
 
 export default function App() {
   const [stations, setStations] = useState([]);
@@ -17,6 +25,7 @@ export default function App() {
 
   const [fromStationId, setFromStationId] = useState("shingu_chuo");
   const [toStationId, setToStationId] = useState("hakata");
+  const [routeKey, setRouteKey] = useState("");
 
   const [candidates, setCandidates] = useState([]);
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -26,6 +35,10 @@ export default function App() {
 
   // 初回表示時に stations / trains / stopTimes をまとめて読み込む
   // 3種類のCSVを先に読み込んでから画面表示する
+  const activePreset = useMemo(() => {
+    return presetRoutes[routeKey] || null;
+  }, [routeKey]);
+
   useEffect(() => {
     async function init() {
       try {
@@ -42,6 +55,26 @@ export default function App() {
         setTrains(trainData);
         setStopTimes(stopTimeData);
         setCurrentTime(formatNowTime(new Date()));
+
+        const urlRouteKey = getRouteKeyFromUrl();
+        const urlPreset = presetRoutes[urlRouteKey];
+
+        if (urlPreset) {
+          setRouteKey(urlRouteKey);
+          setFromStationId(urlPreset.from);
+          setToStationId(urlPreset.to);
+          localStorage.setItem(LAST_ROUTE_KEY, urlRouteKey);
+          return;
+        }
+
+        const savedRouteKey = localStorage.getItem(LAST_ROUTE_KEY);
+        const savedPreset = presetRoutes[savedRouteKey];
+
+        if (savedPreset) {
+          setRouteKey(savedRouteKey);
+          setFromStationId(savedPreset.from);
+          setToStationId(savedPreset.to);
+        }
       } catch (err) {
         console.error(err);
         setError("CSVの読み込みに失敗しました。");
@@ -55,6 +88,14 @@ export default function App() {
 
   // 駅選択後、現在時刻をもとに候補列車を再計算する
   // 候補生成と本命候補の決定をここで行う
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(formatNowTime(new Date()));
+    }, 60 * 1000);
+
+    return () => clearInterval(timer);
+  }, []);
+
   useEffect(() => {
     if (!stations.length || !trains.length || !stopTimes.length) return;
     if (!fromStationId || !toStationId) return;
@@ -100,6 +141,16 @@ export default function App() {
   const toStation = stations.find((s) => s.station_id === toStationId);
   const main = candidates[selectedIndex];
 
+  const handleFromChange = (e) => {
+    setFromStationId(e.target.value);
+    setRouteKey("");
+  };
+
+  const handleToChange = (e) => {
+    setToStationId(e.target.value);
+    setRouteKey("");
+  };
+
   if (loading) {
     return (
       <div className="app">
@@ -133,7 +184,7 @@ export default function App() {
               id="fromStation"
               className="select-input"
               value={fromStationId}
-              onChange={(e) => setFromStationId(e.target.value)}
+              onChange={handleFromChange}
             >
               {stations.map((station) => (
                 <option key={station.station_id} value={station.station_id}>
@@ -151,7 +202,7 @@ export default function App() {
               id="toStation"
               className="select-input"
               value={toStationId}
-              onChange={(e) => setToStationId(e.target.value)}
+              onChange={handleToChange}
             >
               {stations.map((station) => (
                 <option key={station.station_id} value={station.station_id}>
@@ -162,7 +213,11 @@ export default function App() {
           </div>
         </section>
 
-        
+        {activePreset && (
+          <section className="route-badge-section">
+            <div className="route-badge">{activePreset.label}</div>
+          </section>
+        )}
 
         {fromStationId === toStationId ? (
           <div className="empty-message">
@@ -175,8 +230,6 @@ export default function App() {
         ) : (
           <>
             <section className="main-section">
-              
-
               <div className="main-card">
                 <div className="main-top">
                   <div className="arrival-block">
@@ -191,9 +244,7 @@ export default function App() {
                 </div>
 
                 <div className="detail-grid">
-                  
                   <div className="detail-item">
-                  
                     <span className="detail-key">発車時刻</span>
                     <span className="detail-value">{main.depTime}</span>
                   </div>
