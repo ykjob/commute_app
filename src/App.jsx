@@ -24,7 +24,8 @@ export default function App() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  // 初回ロード
+  // 初回表示時に stations / trains / stopTimes をまとめて読み込む
+  // 3種類のCSVを先に読み込んでから画面表示する
   useEffect(() => {
     async function init() {
       try {
@@ -52,7 +53,8 @@ export default function App() {
     init();
   }, []);
 
-  // 駅選択やデータロード後に候補再計算
+  // 駅選択後、現在時刻をもとに候補列車を再計算する
+  // 候補生成と本命候補の決定をここで行う
   useEffect(() => {
     if (!stations.length || !trains.length || !stopTimes.length) return;
     if (!fromStationId || !toStationId) return;
@@ -64,9 +66,11 @@ export default function App() {
     }
 
     try {
+      // 現在時刻を取得し、分単位に変換
       const now = new Date();
       const nowMinutes = getNowMinutes(now);
 
+      // 出発駅・到着駅・現在時刻を元に候補列車を作成
       const builtCandidates = buildCandidates({
         fromStationId,
         toStationId,
@@ -75,6 +79,7 @@ export default function App() {
         nowMinutes,
       });
 
+      // 現在時刻の3分前を基準に、本命候補の位置を決定
       setCandidates(builtCandidates);
 
       const recommendedIndex = getRecommendedIndex(

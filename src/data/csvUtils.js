@@ -7,6 +7,8 @@ export async function fetchCSV(path) {
     throw new Error(`CSV読み込み失敗: ${url}`);
   }
 
+  // CSV文字列を行ごと・セルごとに分割して配列化する
+  // 改行コード \r を除去して Windows 環境にも対応する
   const text = await res.text();
 
   return text
