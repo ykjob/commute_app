@@ -17,27 +17,18 @@ from bs4 import BeautifulSoup, NavigableString, Tag
 # 設定
 # =========================================================
 BASE_URL = "https://www.jrkyushu-timetable.jp"
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 TARGET_DATE = "2026-03-27"
 TARGET_YM = "202603"
 TARGET_DAY = "27"
 
 # 8時台〜19時台
-TARGET_HOURS = set(range(8, 20))
+TARGET_HOURS = set(range(4, 25)) | {0}
+
 
 # 取得対象駅
-STATION_PAGES = {
-    "hakata": {
-        "station_name": "博多",
-        "code": "28283",
-        "url": "https://www.jrkyushu-timetable.jp/cgi-bin/jr-k_time/tt_dep.cgi?c=28283",
-    },
-    "shingu_chuo": {
-        "station_name": "新宮中央",
-        "code": "8262",
-        "url": "https://www.jrkyushu-timetable.jp/cgi-bin/jr-k_time/tt_dep.cgi?c=8262",
-    },
-}
+JR_STATION_CODES_CSV = os.path.join(SCRIPT_DIR, "jr_station_codes.csv")
 
 # 出力先
 OUTPUT_DIR = r"C:\Users\frontier-Python\Desktop\Portfolio\output"
@@ -143,6 +134,44 @@ def load_station_name_to_id(csv_path: str) -> dict[str, str]:
             mapping[station_name] = station_id
 
     return mapping
+
+
+def load_station_pages(csv_path: str) -> dict[str, dict]:
+    if not os.path.exists(csv_path):
+        raise FileNotFoundError(f"JR station code CSV が見つかりません: {csv_path}")
+
+    station_pages = OrderedDict()
+
+    with open(csv_path, "r", encoding="utf-8-sig", newline="") as f:
+        reader = csv.DictReader(f)
+
+        required = {"station_id", "station_name", "jr_code", "source_url"}
+        missing = required - set(reader.fieldnames or [])
+        if missing:
+            raise ValueError(f"JR station code CSV のヘッダー不足: {sorted(missing)}")
+
+        for row in reader:
+            station_id = row["station_id"].strip()
+            station_name = row["station_name"].strip()
+            jr_code = row["jr_code"].strip()
+            source_url = row["source_url"].strip()
+
+            if not station_id or not station_name or not jr_code or not source_url:
+                continue
+
+            if station_id in station_pages:
+                continue
+
+            station_pages[station_id] = {
+                "station_name": station_name,
+                "code": jr_code,
+                "url": source_url,
+            }
+
+    if not station_pages:
+        raise ValueError("JR station code CSV に取得対象駅がありません。")
+
+    return station_pages
 
 
 def build_station_page_url(base_url: str) -> str:
@@ -268,6 +297,11 @@ def extract_detail_links_from_station_page(html: str) -> list[dict]:
 # =========================================================
 # 詳細ページ解析
 # =========================================================
+def normalize_service_time(time_str: str) -> str:
+    if time_str.startswith("00:"):
+        return "24:" + time_str[3:]
+    return time_str
+
 def parse_time_action(token: str):
     """
     例:
@@ -280,7 +314,8 @@ def parse_time_action(token: str):
     m = re.match(r"^(\d{2}:\d{2})\s*(着|発)$", token)
     if not m:
         return None
-    return m.group(1), m.group(2)
+    return normalize_service_time(m.group(1)), m.group(2)
+
 
 
 def is_platform_token(token: str) -> bool:
@@ -536,6 +571,7 @@ def main():
     ensure_dir(OUTPUT_DIR)
 
     station_name_to_id = load_station_name_to_id(STATIONS_CSV)
+    station_pages = load_station_pages(JR_STATION_CODES_CSV)
 
     session = requests.Session()
 
@@ -546,8 +582,9 @@ def main():
 
     log(f"[info] 対象日: {TARGET_DATE}")
     log(f"[info] 対象時間帯: {sorted(TARGET_HOURS)}時台")
+    log(f"[info] 取得対象駅数: {len(station_pages)}")
 
-    for station_key, station in STATION_PAGES.items():
+    for station_key, station in station_pages.items():
         station_page_url = build_station_page_url(station["url"])
         log(f"[station] 取得開始: {station['station_name']} {station_page_url}")
 

@@ -114,8 +114,16 @@ export function getRecommendedIndex(candidates, nowMinutes, offsetMinutes = 3) {
 }
 
 export function getNowMinutes(date = new Date()) {
-  return date.getHours() * 60 + date.getMinutes();
+  const hh = date.getHours();
+  const mm = date.getMinutes();
+
+  if (hh < 4) {
+    return (hh + 24) * 60 + mm;
+  }
+
+  return hh * 60 + mm;
 }
+
 
 export function formatNowTime(date = new Date()) {
   const hh = String(date.getHours()).padStart(2, "0");
